@@ -19,26 +19,27 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _signIn() async {
     setState(() => _loading = true);
     try {
-      await _auth.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Logged in successfully!')),
-      );
+      final user = FirebaseAuth.instance.currentUser;
+      await user?.reload(); // 🔁 refresca datos del usuario
 
-      // ✅ Redirige al home (AppBottomNav)
       if (context.mounted) {
-        Navigator.pushReplacementNamed(
-          context,
-          '/',
-        ); // o usa AppBottomNav.route si tienes una constante
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Welcome back, ${user?.displayName ?? 'User'}!'),
+          ),
+        );
+
+        Navigator.pushReplacementNamed(context, '/');
       }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
+      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
     } finally {
       setState(() => _loading = false);
     }

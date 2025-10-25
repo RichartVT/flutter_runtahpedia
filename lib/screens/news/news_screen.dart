@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/news.dart';
@@ -39,10 +40,13 @@ class NewsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final name = user?.displayName ?? user?.email ?? 'User';
+
     final provider = context.watch<NewsProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('News')),
+      appBar: AppBar(title: Text('Welcome, $name 👋')),
       body: ListView.separated(
         padding: const EdgeInsets.all(24),
         itemCount: allNews.length,

@@ -5,6 +5,7 @@ import '../../providers/cart_provider.dart';
 import '../../widgets/product_card.dart';
 import 'product_detail_screen.dart';
 import 'cart_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ShopScreen extends StatefulWidget {
   static const route = '/shop';
@@ -21,6 +22,9 @@ class _ShopScreenState extends State<ShopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final name = user?.displayName ?? user?.email ?? 'User';
+
     final cart = context.watch<CartProvider>();
 
     // 🔍 Filtrar productos por categoría y búsqueda
@@ -36,7 +40,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shopping'),
+        title: Text('Bienvenido, $name 👋'),
         actions: [
           IconButton(
             onPressed: () => Navigator.pushNamed(context, CartScreen.route),
