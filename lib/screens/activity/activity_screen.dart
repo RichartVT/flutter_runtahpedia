@@ -17,6 +17,16 @@ class ActivityScreen extends StatefulWidget {
   State<ActivityScreen> createState() => _ActivityScreenState();
 }
 
+ImageProvider _getImageProvider(String? path) {
+  if (path == null || path.isEmpty) {
+    return const AssetImage('assets/images/news/newsR.jpg');
+  } else if (path.startsWith('http')) {
+    return NetworkImage(path);
+  } else {
+    return FileImage(File(path));
+  }
+}
+
 class _ActivityScreenState extends State<ActivityScreen> {
   @override
   void initState() {
@@ -98,22 +108,22 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(12),
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: n.imageUrl.isNotEmpty
-                            ? Image.file(
-                                File(n.imageUrl),
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              )
-                            : Image.asset(
-                                'assets/images/news/news.jpg',
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              ),
+                      leading: SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image(
+                            image: _getImageProvider(n.imageUrl),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Image.asset(
+                              'assets/images/news/newsR.jpg',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
                       ),
+
                       title: Text(
                         n.title,
                         maxLines: 2,

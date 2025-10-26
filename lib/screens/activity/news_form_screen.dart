@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+// import 'package:path/path.dart' as p;
 import '../../providers/news_provider.dart';
 import '../../models/news.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class NewsFormScreen extends StatefulWidget {
   const NewsFormScreen({super.key});
@@ -31,11 +31,16 @@ class _NewsFormScreenState extends State<NewsFormScreen> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
 
-    if (picked != null) {
-      setState(() {
-        _selectedImage = File(picked.path);
-      });
-    }
+    if (picked == null) return;
+
+    // Copia la imagen a un directorio permanente
+    final appDir = await getApplicationDocumentsDirectory();
+    final fileName = picked.name;
+    final savedImage = await File(picked.path).copy('${appDir.path}/$fileName');
+
+    setState(() {
+      _selectedImage = savedImage;
+    });
   }
 
   @override
