@@ -9,7 +9,15 @@ class PurchaseDatabase {
   PurchaseDatabase._init();
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
+    // Reabrir si está nulo o cerrado
+    if (_database != null) {
+      try {
+        // sqflite expone isOpen
+        if (_database!.isOpen) return _database!;
+      } catch (_) {
+        /* por si versiones antiguas */
+      }
+    }
     _database = await _initDB('purchases.db');
     return _database!;
   }
@@ -43,8 +51,34 @@ class PurchaseDatabase {
     return result.map((e) => Purchase.fromMap(e)).toList();
   }
 
+  // Borra una compra por id
+  Future<int> deletePurchase(int id) async {
+    final db = await database;
+    return db.delete('purchases', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Borra todas las compras (limpiar historial)
+  Future<void> clearAll() async {
+    final db = await database; // asegura abierta
+    await db.delete('purchases');
+  }
+
+  // Opcional: reset total
+  Future<void> resetDatabase() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'purchases.db');
+    await close();
+    await deleteDatabase(path);
+    _database = null; // fuerza reapertura
+    await database; // recrea con _createDB
+  }
+
+  // Evita llamar close() salvo que salgas de la app
   Future close() async {
-    final db = await instance.database;
-    db.close();
+    final db = _database;
+    if (db != null && db.isOpen) {
+      await db.close();
+    }
+    _database = null;
   }
 }

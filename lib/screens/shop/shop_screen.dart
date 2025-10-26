@@ -113,7 +113,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   itemCount: filteredProducts.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: .78,
+                    childAspectRatio: 0.72,
                     crossAxisSpacing: 14,
                     mainAxisSpacing: 14,
                   ),
@@ -122,10 +122,9 @@ class _ShopScreenState extends State<ShopScreen> {
                     return ProductCard(
                       product: p,
                       onTap: () {
-                        Navigator.pushNamed(
-                          context,
+                        Navigator.of(context).pushNamed(
                           ProductDetailScreen.route,
-                          arguments: p,
+                          arguments: p, // <-- MUY IMPORTANTE
                         );
                       },
                       onAdd: () => context.read<CartProvider>().add(p),

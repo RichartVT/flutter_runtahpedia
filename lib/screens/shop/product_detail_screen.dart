@@ -5,7 +5,9 @@ import '../../providers/cart_provider.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   static const route = '/product-detail';
-  const ProductDetailScreen({super.key});
+
+  final Product product; // <-- obligatorio
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -16,7 +18,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Product p = ModalRoute.of(context)!.settings.arguments as Product;
+    final p = widget.product; // <-- usa el que viene por ctor
+
+    // final Product p = ModalRoute.of(context)!.settings.arguments as Product;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Vegetables')),

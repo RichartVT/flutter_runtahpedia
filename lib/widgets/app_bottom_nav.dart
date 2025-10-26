@@ -55,8 +55,8 @@ class _AppBottomNavState extends State<AppBottomNav> {
             label: 'Shop',
           ),
           NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Message',
+            icon: Icon(Icons.shopping_bag_outlined),
+            label: 'Purchases',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

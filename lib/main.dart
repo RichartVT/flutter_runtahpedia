@@ -22,6 +22,9 @@ import 'screens/shop/cart_screen.dart';
 import 'screens/shop/product_detail_screen.dart';
 import 'screens/shop/checkout_success_screen.dart';
 
+import 'models/product.dart';
+import 'screens/shop/product_detail_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -57,6 +60,33 @@ class RuntahPediaApp extends StatelessWidget {
         ActivityScreen.route: (_) => const ActivityScreen(),
         MessagesScreen.route: (_) => const MessagesScreen(),
         AccountScreen.route: (_) => const AccountScreen(),
+        // ProductDetailScreen.route: (_) => const ProductDetailScreen(product: null!), // Placeholder
+      },
+      onGenerateRoute: (settings) {
+        debugPrint(
+          'args = ${settings.arguments} (${settings.arguments.runtimeType})',
+        );
+        switch (settings.name) {
+          case ProductDetailScreen.route:
+            final args = settings.arguments;
+            if (args is Product) {
+              return MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: args),
+              );
+            }
+            // Si llega sin argumentos, muestra un fallback en vez de crashear
+            return MaterialPageRoute(
+              builder: (_) => const Scaffold(
+                body: Center(child: Text('No se recibió el producto')),
+              ),
+            );
+
+          default:
+            return MaterialPageRoute(
+              builder: (_) =>
+                  const Scaffold(body: Center(child: Text('Route not found'))),
+            );
+        }
       },
     );
   }
