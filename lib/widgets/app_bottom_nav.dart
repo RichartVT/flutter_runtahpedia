@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/purchases/purchase_history_screen.dart';
 import '../screens/news/news_screen.dart';
 import '../screens/shop/shop_screen.dart';
 import '../screens/messages/messages_screen.dart';
@@ -20,7 +21,7 @@ class _AppBottomNavState extends State<AppBottomNav> {
     NewsScreen(),
     ActivityPlaceholder(),
     ShopScreen(),
-    MessagesScreen(),
+    PurchaseHistoryScreen(),
     AccountScreen(),
   ];
 

@@ -37,28 +37,36 @@ class CartScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(it.name,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 16)),
-                          Text('1kg, ${it.price.toStringAsFixed(0)}RP',
-                              style: const TextStyle(color: Colors.green)),
+                          Text(
+                            it.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            '1kg, ${it.price.toStringAsFixed(0)}MXN',
+                            style: const TextStyle(color: Colors.green),
+                          ),
                         ],
                       ),
                     ),
-                    _qtyButton(context,
-                        icon: Icons.remove,
-                        onTap: () => context
-                            .read<CartProvider>()
-                            .decrement(it.productId)),
+                    _qtyButton(
+                      context,
+                      icon: Icons.remove,
+                      onTap: () =>
+                          context.read<CartProvider>().decrement(it.productId),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text('${it.qty}'),
                     ),
-                    _qtyButton(context,
-                        icon: Icons.add,
-                        onTap: () => context
-                            .read<CartProvider>()
-                            .increment(it.productId)),
+                    _qtyButton(
+                      context,
+                      icon: Icons.add,
+                      onTap: () =>
+                          context.read<CartProvider>().increment(it.productId),
+                    ),
                   ],
                 );
               },
@@ -100,8 +108,10 @@ class CartScreen extends StatelessWidget {
             Icon(Icons.location_on_outlined),
             SizedBox(width: 10),
             Expanded(
-              child: Text('Pickup Point:\nKantor Desa Demangharjo',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(
+                'Pickup Point:\nKantor Desa Demangharjo',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             Icon(Icons.map_outlined),
           ],
@@ -110,8 +120,11 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _qtyButton(BuildContext context,
-      {required IconData icon, required VoidCallback onTap}) {
+  Widget _qtyButton(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return CircleAvatar(
       backgroundColor: const Color(0xFFF0F3F1),
       child: IconButton(icon: Icon(icon), onPressed: onTap),

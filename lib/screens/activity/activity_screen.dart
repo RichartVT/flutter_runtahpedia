@@ -44,7 +44,7 @@ class ActivityScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                         child: AspectRatio(
                           aspectRatio: 16 / 9,
-                          child: Image.network(it.imageUrl, fit: BoxFit.cover),
+                          child: Image.asset(it.imageUrl, fit: BoxFit.cover),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -119,7 +119,7 @@ class _SavedNewsCard extends StatelessWidget {
                 topLeft: Radius.circular(14),
                 bottomLeft: Radius.circular(14),
               ),
-              child: Image.network(
+              child: Image.asset(
                 news.imageUrl,
                 width: 120,
                 height: 90,

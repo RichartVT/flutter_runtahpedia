@@ -14,7 +14,7 @@ class NewsDetailScreen extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.network(news.imageUrl, fit: BoxFit.cover),
+            child: Image.asset(news.imageUrl, fit: BoxFit.cover),
           ),
           const SizedBox(height: 20),
           Text(news.category, style: const TextStyle(color: Colors.grey)),

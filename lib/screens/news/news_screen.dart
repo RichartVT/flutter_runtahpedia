@@ -16,8 +16,8 @@ class NewsScreen extends StatelessWidget {
       title: 'Sampah plastik: Reduce dan Reuse dahulu sebelum Recycle',
       category: 'Indonesia',
       author: 'Greenpeace',
-      imageUrl:
-          'https://pixabay.com/get/g0d42176d940f491a8d7b079ba5cc257c75056a1643442618ee7e138a0306c4d1eb17625c8ef734c47e77a99ba65cef11148a4e7b326f38f41fa4896259d199d0_1280.png',
+      imageUrl: 'assets/images/news/news.jpg',
+
       content:
           'Plastic waste has become one of the world\'s largest environmental problems. '
           'This article discusses how reducing and reusing before recycling can minimize its impact on nature and marine life.',
@@ -30,8 +30,7 @@ class NewsScreen extends StatelessWidget {
           'Why world leaders must step up to protect biodiversity at CBD COP15',
       category: 'International',
       author: 'Greenpeace',
-      imageUrl:
-          'https://images.pexels.com/photos/41949/earth-earth-at-night-night-lights-41949.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      imageUrl: 'assets/images/news/news.jpg',
       content:
           'At the CBD COP15, global leaders discussed policies to protect biodiversity and ecosystems. This article highlights key commitments and the urgent need for collective global action.',
       date: DateTime(2022, 10, 7),
@@ -71,7 +70,7 @@ class NewsScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.network(it.imageUrl, fit: BoxFit.cover),
+                        child: Image.asset(it.imageUrl, fit: BoxFit.cover),
                       ),
                     ),
                     Positioned(

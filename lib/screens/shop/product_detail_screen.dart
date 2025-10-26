@@ -24,7 +24,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           AspectRatio(
             aspectRatio: 16 / 10,
-            child: Image.network(p.imageUrl, fit: BoxFit.cover),
+            child: Image.asset(p.imageUrl, fit: BoxFit.cover),
           ),
           Container(
             padding: const EdgeInsets.all(20),
@@ -38,9 +38,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(p.name,
-                          style: const TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.w700)),
+                      child: Text(
+                        p.name,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                     _qtyButton(Icons.remove, () {
                       setState(() => qty = qty > 1 ? qty - 1 : 1);
@@ -55,9 +59,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text('${p.unit}, ${p.price.toStringAsFixed(0)}RP',
-                    style: const TextStyle(
-                        color: Colors.green, fontWeight: FontWeight.w700)),
+                Text(
+                  '${p.unit}, ${p.price.toStringAsFixed(0)}MXN',
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Text(p.description),
                 const SizedBox(height: 16),
@@ -111,9 +119,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w600, color: Colors.black87)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
           const SizedBox(width: 8),
           Text(value, style: const TextStyle(color: Colors.black54)),
         ],
