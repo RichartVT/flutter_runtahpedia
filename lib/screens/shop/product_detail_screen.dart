@@ -28,7 +28,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           AspectRatio(
             aspectRatio: 16 / 10,
-            child: Image.asset(p.imageUrl, fit: BoxFit.cover),
+            child: Image.asset(widget.product.imageUrl, fit: BoxFit.cover),
           ),
           Container(
             padding: const EdgeInsets.all(20),

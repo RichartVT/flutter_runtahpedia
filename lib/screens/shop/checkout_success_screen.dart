@@ -21,7 +21,10 @@ class CheckoutSuccessScreen extends StatelessWidget {
         'S-${Random().nextInt(900) + 100} ${Random().nextInt(900) + 100}';
 
     // Aplicamos tu descuento de -10 de forma segura
-    final double grandTotal = ((totalArg - 10).clamp(0, 1e9)).toDouble(); // MXN
+
+    final cartTotal = context.read<CartProvider>().total;
+    final double grandTotal =
+        (((totalArg > 0 ? totalArg : cartTotal) - 10).clamp(0, 1e9)).toDouble();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Check Out')),
@@ -149,91 +152,51 @@ class CheckoutSuccessScreen extends StatelessWidget {
   }
 
   /// Intenta leer el carrito desde el provider y genera:
-  /// - quantity total
-  /// - items (JSON si es posible; texto si no)
-  /// Luego inserta en SQLite y limpia el carrito.
   Future<bool> _savePurchaseFromCart({
     required BuildContext context,
     required double grandTotal,
   }) async {
     final cart = context.read<CartProvider>();
 
-    // 1) Obtener cantidad total
-    int quantity = 0;
-    try {
-      // Si el provider expone 'count' (como usaste en el badge)
-      quantity = cart.count;
-    } catch (_) {
-      // fallback: intenta sumar desde items si es un Map<Product,int>
-      try {
-        final dynamic items = cart.items;
-        if (items is Map) {
-          quantity = items.values.fold<int>(0, (a, b) => a + (b as int));
-        }
-      } catch (_) {}
-    }
+    // Si no hay nada en el carrito, nos salimos
+    final items = cart.items; // List<CartItem>
+    if (items.isEmpty) return false;
 
-    if (quantity <= 0) return false;
+    // Cantidad total (suma de qty)
+    final int quantity = items.fold<int>(0, (sum, it) => sum + it.qty);
 
-    // 2) Intentar construir JSON de items (name, qty, price)
-    String itemsString = 'Various products';
-    try {
-      final dynamic raw = cart.items;
+    // Serializamos para guardarlo en 'items' (string)
+    final itemsList = items.map((it) {
+      return {
+        'productId': it.productId,
+        'name': it.name,
+        'qty': it.qty,
+        'price': it.price,
+        'subtotal': (it.price * it.qty),
+        'imageUrl': it.imageUrl,
+      };
+    }).toList();
+    final String itemsString = jsonEncode(itemsList);
 
-      if (raw is Map) {
-        // caso más común: Map<Product, int>
-        final list = raw.entries.map((e) {
-          final p = e.key; // Product
-          final q = e.value; // int
-          final id = (p as dynamic).id ?? '';
-          final name = (p as dynamic).name ?? '';
-          final price = ((p as dynamic).price as num?)?.toDouble() ?? 0.0;
-          return {'id': id, 'name': name, 'qty': q, 'price': price};
-        }).toList();
-        itemsString = jsonEncode(list);
-      } else if (raw is Iterable) {
-        // otro caso: lista de CartLine con product y qty
-        final list = raw.map((it) {
-          final product = (it as dynamic).product;
-          final qty = (it as dynamic).qty ?? 1;
-          final id = (product as dynamic).id ?? '';
-          final name = (product as dynamic).name ?? '';
-          final price = ((product as dynamic).price as num?)?.toDouble() ?? 0.0;
-          return {'id': id, 'name': name, 'qty': qty, 'price': price};
-        }).toList();
-        itemsString = jsonEncode(list);
-      } else {
-        // último recurso: nombres separados por coma si existe 'items'
-        try {
-          itemsString = (raw as Iterable)
-              .map((e) => (e as dynamic).product.name)
-              .join(', ');
-        } catch (_) {}
-      }
-    } catch (_) {
-      // deja itemsString como 'Various products'
-    }
-
-    // 3) Fecha en formato simple (BD actual la espera como TEXT simple)
+    // Fecha como TEXT
     final formattedDate = DateFormat(
       'yyyy-MM-dd HH:mm:ss',
     ).format(DateTime.now());
 
-    // 4) Insertar en SQLite
+    // Si por cualquier motivo grandTotal llega 0, usa el total real del carrito
+    final double totalToSave = grandTotal > 0 ? grandTotal : cart.total;
+
     await PurchaseDatabase.instance.insertPurchase(
       Purchase(
         date: formattedDate,
-        total: grandTotal,
+        total: totalToSave,
         quantity: quantity,
         items: itemsString,
       ),
     );
 
-    // 5) Limpiar carrito (si tu provider lo soporta)
-    try {
-      cart.clear();
-    } catch (_) {}
-
+    // Limpia carrito
+    cart.clear();
     return true;
   }
 

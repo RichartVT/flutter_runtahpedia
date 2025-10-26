@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/purchases/purchase_history_screen.dart';
 import '../screens/news/news_screen.dart';
 import '../screens/shop/shop_screen.dart';
-import '../screens/messages/messages_screen.dart';
 import '../screens/account/account_screen.dart';
 import '../theme/app_theme.dart';
 

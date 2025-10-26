@@ -7,7 +7,7 @@ class CartProvider extends ChangeNotifier {
   final Map<String, CartItem> _items = {}; // key: productId
 
   List<CartItem> get items => _items.values.toList();
-  int get count => _items.length;
+  int get count => _items.values.fold(0, (sum, it) => sum + it.qty);
 
   int qtyOf(String productId) => _items[productId]?.qty ?? 0;
 

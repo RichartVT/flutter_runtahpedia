@@ -23,7 +23,6 @@ import 'screens/shop/product_detail_screen.dart';
 import 'screens/shop/checkout_success_screen.dart';
 
 import 'models/product.dart';
-import 'screens/shop/product_detail_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
