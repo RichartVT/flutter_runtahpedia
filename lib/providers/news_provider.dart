@@ -10,6 +10,8 @@ class NewsProvider extends ChangeNotifier {
   /// Cargar las noticias desde SQLite
   Future<void> loadNews() async {
     final all = await NewsDatabase.instance.getAllNews();
+    debugPrint('🗂 Loaded ${all.length} news from DB');
+
     _savedNews
       ..clear()
       ..addAll(all);
@@ -25,6 +27,7 @@ class NewsProvider extends ChangeNotifier {
   Future<void> addNews(News news) async {
     await NewsDatabase.instance.insertNews(news);
     _savedNews.add(news);
+    debugPrint('✅ Added news: ${news.title}');
     notifyListeners();
   }
 

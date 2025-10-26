@@ -77,22 +77,26 @@ class NewsScreen extends StatelessWidget {
                       right: 8,
                       top: 8,
                       child: IconButton(
-                        onPressed: () {
-                          context.read<NewsProvider>().toggleSaved(it);
+                        onPressed: () async {
+                          await context.read<NewsProvider>().toggleSaved(it);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                saved
-                                    ? 'Removed from saved news'
-                                    : 'Saved to favorites',
+                                context.read<NewsProvider>().isSaved(it)
+                                    ? 'Saved to favorites'
+                                    : 'Removed from saved news',
                               ),
                               duration: const Duration(seconds: 1),
                             ),
                           );
                         },
                         icon: Icon(
-                          saved ? Icons.bookmark : Icons.bookmark_border,
-                          color: saved ? Colors.green : Colors.red,
+                          provider.isSaved(it)
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          color: provider.isSaved(it)
+                              ? Colors.green
+                              : Colors.red,
                         ),
                       ),
                     ),
