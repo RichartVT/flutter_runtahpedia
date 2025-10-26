@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +10,18 @@ import 'news_detail_screen.dart';
 class NewsScreen extends StatelessWidget {
   static const route = '/news';
   NewsScreen({super.key});
+
+  ImageProvider<Object> getNewsImage(String? path) {
+    if (path == null || path.isEmpty) {
+      return const AssetImage('assets/images/news/newsR.jpg');
+    } else if (path.startsWith('http')) {
+      return NetworkImage(path);
+    } else if (path.startsWith('/')) {
+      return FileImage(File(path));
+    } else {
+      return AssetImage(path);
+    }
+  }
 
   // Lista de noticias
   final List<News> allNews = [
@@ -67,10 +81,12 @@ class NewsScreen extends StatelessWidget {
                 Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: Image.asset(it.imageUrl, fit: BoxFit.cover),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image(
+                        image: getNewsImage(it.imageUrl),
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
                       ),
                     ),
                     Positioned(

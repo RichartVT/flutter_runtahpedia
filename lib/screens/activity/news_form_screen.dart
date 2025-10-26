@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../../providers/news_provider.dart';
 import '../../models/news.dart';
+import 'package:image_picker/image_picker.dart';
 
 class NewsFormScreen extends StatefulWidget {
   const NewsFormScreen({super.key});
@@ -17,24 +18,24 @@ class NewsFormScreen extends StatefulWidget {
 
 class _NewsFormScreenState extends State<NewsFormScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // Campos del formulario
   String title = '';
   String category = '';
   String author = '';
   String content = '';
   File? _selectedImage;
 
+  // 📸 Método para seleccionar imagen desde la galería
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
 
-    if (picked == null) return;
-
-    // Guardar una copia persistente dentro de app/documents
-    final dir = await getApplicationDocumentsDirectory();
-    final newPath = p.join(dir.path, p.basename(picked.path));
-    final savedImage = await File(picked.path).copy(newPath);
-
-    setState(() => _selectedImage = savedImage);
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+      });
+    }
   }
 
   @override
@@ -47,13 +48,13 @@ class _NewsFormScreenState extends State<NewsFormScreen> {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
-              // 🖼️ Selector de imagen
+              // 🖼️ Imagen de portada
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
@@ -87,69 +88,89 @@ class _NewsFormScreenState extends State<NewsFormScreen> {
                             ],
                           ),
                         )
-                      : const SizedBox.shrink(),
+                      : null,
                 ),
               ),
               const SizedBox(height: 20),
 
+              // 📝 Campos del formulario
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Título'),
+                decoration: const InputDecoration(
+                  labelText: 'Título',
+                  border: OutlineInputBorder(),
+                ),
                 onSaved: (v) => title = v ?? '',
                 validator: (v) => v!.isEmpty ? 'Ingresa el título' : null,
               ),
+              const SizedBox(height: 16),
+
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Categoría'),
+                decoration: const InputDecoration(
+                  labelText: 'Categoría',
+                  border: OutlineInputBorder(),
+                ),
                 onSaved: (v) => category = v ?? '',
                 validator: (v) => v!.isEmpty ? 'Ingresa la categoría' : null,
               ),
+              const SizedBox(height: 16),
+
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Autor'),
+                decoration: const InputDecoration(
+                  labelText: 'Autor',
+                  border: OutlineInputBorder(),
+                ),
                 onSaved: (v) => author = v ?? '',
                 validator: (v) => v!.isEmpty ? 'Ingresa el autor' : null,
               ),
+              const SizedBox(height: 16),
+
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Contenido'),
-                maxLines: 5,
+                decoration: const InputDecoration(
+                  labelText: 'Contenido',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 6,
                 onSaved: (v) => content = v ?? '',
                 validator: (v) => v!.isEmpty ? 'Ingresa el contenido' : null,
               ),
               const SizedBox(height: 30),
 
-              ElevatedButton.icon(
-                icon: const Icon(Icons.publish, color: Colors.white),
-                label: const Text(
-                  'Publicar',
-                  style: TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              // 🔘 Botón para guardar
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.check, color: Colors.white),
+                  label: const Text(
+                    'Publicar Noticia',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (!_formKey.currentState!.validate()) return;
+                    _formKey.currentState!.save();
+
+                    final news = News(
+                      id: 'N-${Random().nextInt(999999)}',
+                      title: title,
+                      category: category,
+                      author: author,
+                      imageUrl: _selectedImage?.path ?? '',
+                      content: content,
+                      date: DateTime.now(),
+                    );
+
+                    await context.read<NewsProvider>().addNews(news);
+
+                    if (!mounted) return;
+                    Navigator.pop(context);
+                  },
                 ),
-                onPressed: () async {
-                  if (!_formKey.currentState!.validate()) return;
-                  _formKey.currentState!.save();
-
-                  final id = 'N-${Random().nextInt(999999)}';
-                  final now = DateTime.now();
-
-                  final news = News(
-                    id: id,
-                    title: title,
-                    category: category,
-                    author: author,
-                    imageUrl: _selectedImage?.path ?? '',
-                    content: content,
-                    date: now,
-                  );
-
-                  await context.read<NewsProvider>().addNews(news);
-
-                  if (!mounted) return;
-                  Navigator.pop(context);
-                },
               ),
             ],
           ),
