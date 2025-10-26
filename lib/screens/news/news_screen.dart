@@ -29,8 +29,8 @@ class NewsScreen extends StatelessWidget {
       title:
           'Why world leaders must step up to protect biodiversity at CBD COP15',
       category: 'International',
-      author: 'Greenpeace',
-      imageUrl: 'assets/images/news/news.jpg',
+      author: 'Save RHYNO',
+      imageUrl: 'assets/images/news/newsR.jpg',
       content:
           'At the CBD COP15, global leaders discussed policies to protect biodiversity and ecosystems. This article highlights key commitments and the urgent need for collective global action.',
       date: DateTime(2022, 10, 7),
@@ -92,7 +92,7 @@ class NewsScreen extends StatelessWidget {
                         },
                         icon: Icon(
                           saved ? Icons.bookmark : Icons.bookmark_border,
-                          color: saved ? Colors.green : Colors.white,
+                          color: saved ? Colors.green : Colors.red,
                         ),
                       ),
                     ),

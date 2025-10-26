@@ -81,13 +81,13 @@ class CartScreen extends StatelessWidget {
                     ? null
                     : () {
                         final total = cart.total;
-                        cart.clear();
                         Navigator.pushNamed(
                           context,
                           CheckoutSuccessScreen.route,
                           arguments: total,
                         );
                       },
+
                 child: const Text('Checkout'),
               ),
             ),

@@ -18,24 +18,35 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _purchasesFuture = PurchaseDatabase.instance.getAllPurchases();
+    _loadPurchases();
   }
 
-  Future<void> _reload() async {
+  Future<void> _loadPurchases() async {
     setState(() {
       _purchasesFuture = PurchaseDatabase.instance.getAllPurchases();
     });
   }
 
+  Future<void> _deletePurchase(Purchase purchase) async {
+    if (purchase.id == null) return;
+    await PurchaseDatabase.instance.deletePurchase(purchase.id!);
+    await _loadPurchases();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Purchase #${purchase.id} deleted'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   String _formatDate(String ymd) {
-    // Espera "YYYY-MM-DD"; si te llega con hora ISO, igual lo parsea
     DateTime d;
     try {
       d = DateTime.parse(ymd);
     } catch (_) {
-      // fallback: intenta tratarlo como yyyy-MM-dd
       final parts = ymd.split('-');
-      if (parts.length == 3) {
+      if (parts.length >= 3) {
         d = DateTime(
           int.tryParse(parts[0]) ?? DateTime.now().year,
           int.tryParse(parts[1]) ?? DateTime.now().month,
@@ -45,7 +56,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
         d = DateTime.now();
       }
     }
-    return DateFormat('d MMM yyyy').format(d);
+    return DateFormat('d MMM yyyy, HH:mm').format(d);
   }
 
   @override
@@ -77,17 +88,12 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
                 ),
               );
               if (confirm == true) {
-                await PurchaseDatabase.instance.close(); // cierra db abierta
-                // reabre para limpiar
-                await PurchaseDatabase.instance.database;
                 await PurchaseDatabase.instance.clearAll();
-                setState(() {
-                  _purchasesFuture = PurchaseDatabase.instance
-                      .getAllPurchases();
-                }); // noop
-                // mejor: borra tablas
-                // como no hay método expuesto, usa clear simple:
-                // (opcional: añade un método .clear() en tu DB)
+                _loadPurchases();
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('All purchases cleared')),
+                );
               }
             },
             icon: const Icon(Icons.delete_sweep_outlined),
@@ -95,7 +101,7 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _reload,
+        onRefresh: _loadPurchases,
         child: FutureBuilder<List<Purchase>>(
           future: _purchasesFuture,
           builder: (context, snapshot) {
@@ -125,17 +131,57 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) {
                 final p = purchases[i];
-                return _PurchaseCard(
-                  purchase: p,
-                  formattedDate: _formatDate(p.date),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PurchaseDetailScreen(purchase: p),
+
+                return Dismissible(
+                  key: ValueKey(p.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    color: Colors.redAccent,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                  confirmDismiss: (_) async {
+                    return await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Delete Purchase'),
+                        content: Text(
+                          'Are you sure you want to delete purchase #${p.id}? This action cannot be undone.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                            ),
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
                       ),
                     );
                   },
+                  onDismissed: (_) => _deletePurchase(p),
+                  child: _PurchaseCard(
+                    purchase: p,
+                    formattedDate: _formatDate(p.date),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PurchaseDetailScreen(purchase: p),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             );

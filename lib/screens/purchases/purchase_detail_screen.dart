@@ -1,125 +1,86 @@
-// TODO Implement this library.
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../models/purchase.dart';
 
 class PurchaseDetailScreen extends StatelessWidget {
   final Purchase purchase;
   const PurchaseDetailScreen({super.key, required this.purchase});
 
-  List<_ParsedItem> _parseItems(String raw) {
-    // Espera JSON tipo:
-    // [{"name":"Strawberry","qty":2,"price":40.0}, ...]
-    // Fallback: si no es JSON, devuelve una sola linea con el texto
-    try {
-      final decoded = json.decode(raw);
-      if (decoded is List) {
-        return decoded.map<_ParsedItem>((e) {
-          final name = (e['name'] ?? '').toString();
-          final qty = int.tryParse(e['qty']?.toString() ?? '') ?? 1;
-          final price = double.tryParse(e['price']?.toString() ?? '') ?? 0.0;
-          return _ParsedItem(name: name, qty: qty, price: price);
-        }).toList();
-      }
-    } catch (_) {
-      // ignore
-    }
-    // Fallback: items como texto plano
-    if (raw.trim().isEmpty) return [];
-    return [_ParsedItem(name: raw.trim(), qty: purchase.quantity, price: 0.0)];
-  }
-
   @override
   Widget build(BuildContext context) {
-    final date = _formatDate(purchase.date);
-    final items = _parseItems(purchase.items);
-    final currency = NumberFormat.currency(symbol: 'MXN ', decimalDigits: 2);
+    // 🔍 Decodifica los productos guardados como JSON en la BD
+    final List<dynamic> decoded = jsonDecode(purchase.items);
+    final List<Map<String, dynamic>> products = decoded
+        .map((e) => e as Map<String, dynamic>)
+        .toList();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Purchase Details')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         children: [
-          _section(
-            context,
-            title: 'Summary',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _kv('Order ID', '#${purchase.id ?? '-'}'),
-                _kv('Date', date),
-                _kv('Items', '${purchase.quantity}'),
-                _kv('Total paid', currency.format(purchase.total)),
-              ],
+          _summary(purchase),
+          const SizedBox(height: 20),
+          Text(
+            'Products',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 16),
-          _section(
-            context,
-            title: 'Products',
-            child: items.isEmpty
-                ? const Text('No product details available.')
-                : Column(
-                    children: [
-                      for (final it in items) _itemRow(it, currency),
-                      const Divider(height: 24),
-                      _kv(
-                        'Grand Total',
-                        currency.format(
-                          items.isNotEmpty
-                              ? items.fold<double>(
-                                  0.0,
-                                  (sum, e) => sum + e.qty * e.price,
-                                )
-                              : purchase.total,
-                        ),
-                        valueStyle: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
+          const SizedBox(height: 10),
+
+          // ✅ Lista de productos reales
+          ...products.map(
+            (p) => Card(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              color: const Color(0xFFF5F7F6),
+              child: ListTile(
+                leading: CircleAvatar(
+                  radius: 26,
+                  backgroundImage:
+                      p['imageUrl'] != null &&
+                          p['imageUrl'].toString().isNotEmpty
+                      ? AssetImage(p['imageUrl'])
+                      : const AssetImage('assets/images/products/rhcp.jpg'),
+                ),
+                title: Text(
+                  p['name'],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
                   ),
+                ),
+                subtitle: Text(
+                  'x${p['qty']}  •  ${p['price']} MXN',
+                  style: const TextStyle(color: Colors.black54),
+                ),
+                trailing: Text(
+                  '${p['subtotal']} MXN',
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
-    );
-  }
 
-  String _formatDate(String ymd) {
-    try {
-      final d = DateTime.parse(ymd);
-      return DateFormat('d MMM yyyy • HH:mm').format(d);
-    } catch (_) {
-      return ymd;
-    }
-  }
+          const Divider(height: 40),
 
-  Widget _itemRow(_ParsedItem it, NumberFormat currency) {
-    final line = it.qty * it.price;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
+          // 🧾 Total final
+          Align(
+            alignment: Alignment.centerRight,
             child: Text(
-              it.name,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          Text('x${it.qty}', style: const TextStyle(color: Colors.grey)),
-          const SizedBox(width: 8),
-          Text(
-            currency.format(it.price),
-            style: const TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            currency.format(line),
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Colors.green,
+              'Grand Total: ${purchase.total.toStringAsFixed(2)} MXN',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
             ),
           ),
         ],
@@ -127,55 +88,35 @@ class PurchaseDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _section(
-    BuildContext context, {
-    required String title,
-    required Widget child,
-  }) {
+  Widget _summary(Purchase p) {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.05),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F5F1),
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 10),
-          child,
+          _row('Order ID', '#${p.id ?? '-'}'),
+          _row('Date', p.date),
+          _row('Items', p.quantity.toString()),
+          _row('Total paid', '${p.total.toStringAsFixed(2)} MXN'),
         ],
       ),
     );
   }
 
-  Widget _kv(String k, String v, {TextStyle? valueStyle}) {
+  Widget _row(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Expanded(child: Text(k)),
-          Text(v, style: valueStyle),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const Spacer(),
+          Text(value),
         ],
       ),
     );
   }
-}
-
-class _ParsedItem {
-  final String name;
-  final int qty;
-  final double price;
-
-  _ParsedItem({required this.name, required this.qty, required this.price});
 }
