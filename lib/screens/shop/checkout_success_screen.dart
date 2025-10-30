@@ -189,7 +189,8 @@ class CheckoutSuccessScreen extends StatelessWidget {
         total: totalToSave,
         quantity: quantity,
         items: itemsString,
-        pickupDate: pickupDateStr,
+        pickupDate:
+            pickupDateStr, // 👈 este es el que se guarda en la base de datos
       ),
     );
 

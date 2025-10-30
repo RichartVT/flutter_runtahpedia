@@ -9,8 +9,9 @@ class PurchaseDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 🔍 Decodifica los productos guardados como JSON en la BD
-    final List<dynamic> decoded = jsonDecode(purchase.items);
-    final List<Map<String, dynamic>> products = decoded
+    final Map<String, dynamic> decoded = jsonDecode(purchase.items);
+    final List<dynamic> rawProducts = decoded['products'] ?? [];
+    final List<Map<String, dynamic>> products = rawProducts
         .map((e) => e as Map<String, dynamic>)
         .toList();
 
