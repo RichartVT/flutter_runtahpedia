@@ -5,6 +5,7 @@ import '../models/product.dart';
 
 class CartProvider extends ChangeNotifier {
   final Map<String, CartItem> _items = {}; // key: productId
+  DateTime? pickupDate;
 
   List<CartItem> get items => _items.values.toList();
   int get count => _items.values.fold(0, (sum, it) => sum + it.qty);
@@ -49,6 +50,11 @@ class CartProvider extends ChangeNotifier {
 
   void clear() {
     _items.clear();
+    notifyListeners();
+  }
+
+  void setPickupDate(DateTime date) {
+    pickupDate = date;
     notifyListeners();
   }
 }

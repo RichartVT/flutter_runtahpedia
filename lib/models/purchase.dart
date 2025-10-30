@@ -1,9 +1,10 @@
 class Purchase {
   final int? id;
-  final String date; // formato simple: YYYY-MM-DD
+  final String date;
   final double total;
   final int quantity;
-  final String items; // JSON string o nombres concatenados
+  final String items;
+  final String pickupDate;
 
   Purchase({
     this.id,
@@ -11,6 +12,7 @@ class Purchase {
     required this.total,
     required this.quantity,
     required this.items,
+    this.pickupDate = '',
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class Purchase {
       'total': total,
       'quantity': quantity,
       'items': items,
+      'pickupDate': pickupDate,
     };
   }
 
@@ -30,6 +33,7 @@ class Purchase {
       total: map['total'],
       quantity: map['quantity'],
       items: map['items'],
+      pickupDate: map['pickupDate'] ?? '',
     );
   }
 }

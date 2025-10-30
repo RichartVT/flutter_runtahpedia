@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
+
 import '../../providers/cart_provider.dart';
 import 'checkout_success_screen.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   static const route = '/cart';
   const CartScreen({super.key});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  DateTime? _selectedPickupDate;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +62,6 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
                     _qtyButton(
-                      context,
                       icon: Icons.remove,
                       onTap: () =>
                           context.read<CartProvider>().decrement(it.productId),
@@ -62,7 +71,6 @@ class CartScreen extends StatelessWidget {
                       child: Text('${it.qty}'),
                     ),
                     _qtyButton(
-                      context,
                       icon: Icons.add,
                       onTap: () =>
                           context.read<CartProvider>().increment(it.productId),
@@ -77,17 +85,23 @@ class CartScreen extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: cart.items.isEmpty
+                onPressed: cart.items.isEmpty || _selectedPickupDate == null
                     ? null
                     : () {
                         final total = cart.total;
+                        final pickupDateStr = DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(_selectedPickupDate!);
+
                         Navigator.pushNamed(
                           context,
                           CheckoutSuccessScreen.route,
-                          arguments: total,
+                          arguments: {
+                            'total': total,
+                            'pickupDate': pickupDateStr,
+                          },
                         );
                       },
-
                 child: const Text('Checkout'),
               ),
             ),
@@ -98,33 +112,44 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _pickupCard() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        color: const Color(0xFFF0F5F1),
-        padding: const EdgeInsets.all(14),
-        child: const Row(
-          children: [
-            Icon(Icons.location_on_outlined),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Pickup Point:\nKantor Desa Demangharjo',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            Icon(Icons.map_outlined),
-          ],
+    final today = DateTime.now();
+    final firstDay = today.add(const Duration(days: 3));
+    final lastDay = today.add(const Duration(days: 5));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'Select pickup date:',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
-      ),
+        TableCalendar(
+          firstDay: firstDay,
+          lastDay: lastDay,
+          focusedDay: _selectedPickupDate ?? firstDay,
+          selectedDayPredicate: (day) => isSameDay(day, _selectedPickupDate),
+          onDaySelected: (selectedDay, _) {
+            setState(() {
+              _selectedPickupDate = selectedDay;
+            });
+          },
+          headerStyle: const HeaderStyle(formatButtonVisible: false),
+          calendarFormat: CalendarFormat.week,
+          calendarStyle: const CalendarStyle(
+            selectedDecoration: BoxDecoration(
+              color: Colors.green,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _qtyButton(
-    BuildContext context, {
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
+  Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
     return CircleAvatar(
       backgroundColor: const Color(0xFFF0F3F1),
       child: IconButton(icon: Icon(icon), onPressed: onTap),

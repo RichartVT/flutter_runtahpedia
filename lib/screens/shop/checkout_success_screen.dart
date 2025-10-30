@@ -14,13 +14,14 @@ class CheckoutSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double totalArg =
-        (ModalRoute.of(context)!.settings.arguments as double?) ?? 0;
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final double totalArg = args['total'] ?? 0.0;
+    final String pickupDateStr = args['pickupDate'] ?? '';
+
     final now = DateTime.now();
     final code =
         'S-${Random().nextInt(900) + 100} ${Random().nextInt(900) + 100}';
-
-    // Aplicamos tu descuento de -10 de forma segura
 
     final cartTotal = context.read<CartProvider>().total;
     final double grandTotal =
@@ -100,7 +101,6 @@ class CheckoutSuccessScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-
           Row(
             children: [
               Expanded(
@@ -113,10 +113,11 @@ class CheckoutSuccessScreen extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () async {
-                    // 🧾 Guardar en SQLite usando datos reales del carrito
                     final ok = await _savePurchaseFromCart(
                       context: context,
                       grandTotal: grandTotal,
+                      pickupDateStr:
+                          pickupDateStr, // ✅ <--- aquí estaba el error
                     );
 
                     if (!context.mounted) return;
@@ -128,7 +129,6 @@ class CheckoutSuccessScreen extends StatelessWidget {
                           duration: Duration(seconds: 2),
                         ),
                       );
-                      // Vuelve a la raíz (AppBottomNav)
                       Navigator.popUntil(context, (r) => r.isFirst);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -151,39 +151,36 @@ class CheckoutSuccessScreen extends StatelessWidget {
     );
   }
 
-  /// Intenta leer el carrito desde el provider y genera:
   Future<bool> _savePurchaseFromCart({
     required BuildContext context,
     required double grandTotal,
+    required String pickupDateStr,
   }) async {
     final cart = context.read<CartProvider>();
-
-    // Si no hay nada en el carrito, nos salimos
-    final items = cart.items; // List<CartItem>
+    final items = cart.items;
     if (items.isEmpty) return false;
 
-    // Cantidad total (suma de qty)
     final int quantity = items.fold<int>(0, (sum, it) => sum + it.qty);
 
-    // Serializamos para guardarlo en 'items' (string)
-    final itemsList = items.map((it) {
-      return {
-        'productId': it.productId,
-        'name': it.name,
-        'qty': it.qty,
-        'price': it.price,
-        'subtotal': (it.price * it.qty),
-        'imageUrl': it.imageUrl,
-      };
-    }).toList();
+    final itemsList = {
+      'products': items.map((it) {
+        return {
+          'productId': it.productId,
+          'name': it.name,
+          'qty': it.qty,
+          'price': it.price,
+          'subtotal': (it.price * it.qty),
+          'imageUrl': it.imageUrl,
+        };
+      }).toList(),
+      'pickupDate': pickupDateStr,
+    };
+
     final String itemsString = jsonEncode(itemsList);
 
-    // Fecha como TEXT
     final formattedDate = DateFormat(
       'yyyy-MM-dd HH:mm:ss',
     ).format(DateTime.now());
-
-    // Si por cualquier motivo grandTotal llega 0, usa el total real del carrito
     final double totalToSave = grandTotal > 0 ? grandTotal : cart.total;
 
     await PurchaseDatabase.instance.insertPurchase(
@@ -192,10 +189,10 @@ class CheckoutSuccessScreen extends StatelessWidget {
         total: totalToSave,
         quantity: quantity,
         items: itemsString,
+        pickupDate: pickupDateStr,
       ),
     );
 
-    // Limpia carrito
     cart.clear();
     return true;
   }

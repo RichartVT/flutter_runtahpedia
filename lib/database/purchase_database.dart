@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
 import '../models/purchase.dart';
 
 class PurchaseDatabase {
@@ -9,76 +10,71 @@ class PurchaseDatabase {
   PurchaseDatabase._init();
 
   Future<Database> get database async {
-    // Reabrir si está nulo o cerrado
-    if (_database != null) {
-      try {
-        // sqflite expone isOpen
-        if (_database!.isOpen) return _database!;
-      } catch (_) {
-        /* por si versiones antiguas */
-      }
-    }
-    _database = await _initDB('purchases.db');
+    if (_database != null) return _database!;
+    _database = await _initDB('runtahpedia.db');
     return _database!;
   }
 
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+
+    return await openDatabase(
+      path,
+      version: 2, // increment if schema changes
+      onCreate: _createDB,
+      onUpgrade: _upgradeDB,
+    );
   }
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE purchases (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT,
-        total REAL,
-        quantity INTEGER,
-        items TEXT
-      )
+    CREATE TABLE purchases (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      total REAL NOT NULL,
+      quantity INTEGER NOT NULL,
+      items TEXT NOT NULL,
+      pickupDate TEXT
+    )
     ''');
   }
 
-  Future<int> insertPurchase(Purchase purchase) async {
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE purchases ADD COLUMN pickupDate TEXT');
+    }
+  }
+
+  Future<void> insertPurchase(Purchase purchase) async {
     final db = await instance.database;
-    return await db.insert('purchases', purchase.toMap());
+    await db.insert('purchases', purchase.toMap());
   }
 
   Future<List<Purchase>> getAllPurchases() async {
     final db = await instance.database;
-    final result = await db.query('purchases', orderBy: 'id DESC');
-    return result.map((e) => Purchase.fromMap(e)).toList();
+    final result = await db.query('purchases', orderBy: 'date DESC');
+    return result.map((json) => Purchase.fromMap(json)).toList();
   }
 
-  // Borra una compra por id
-  Future<int> deletePurchase(int id) async {
-    final db = await database;
-    return db.delete('purchases', where: 'id = ?', whereArgs: [id]);
+  Future<void> deletePurchase(int id) async {
+    final db = await instance.database;
+    await db.delete('purchases', where: 'id = ?', whereArgs: [id]);
   }
 
-  // Borra todas las compras (limpiar historial)
   Future<void> clearAll() async {
-    final db = await database; // asegura abierta
+    final db = await instance.database;
     await db.delete('purchases');
   }
 
-  // Opcional: reset total
-  Future<void> resetDatabase() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'purchases.db');
-    await close();
-    await deleteDatabase(path);
-    _database = null; // fuerza reapertura
-    await database; // recrea con _createDB
+  Future close() async {
+    final db = await instance.database;
+    db.close();
   }
 
-  // Evita llamar close() salvo que salgas de la app
-  Future close() async {
-    final db = _database;
-    if (db != null && db.isOpen) {
-      await db.close();
-    }
-    _database = null;
+  Future<void> resetDatabase() async {
+    final db = await instance.database;
+    await db.execute('DROP TABLE IF EXISTS purchases');
+    await _createDB(db, 2);
   }
 }

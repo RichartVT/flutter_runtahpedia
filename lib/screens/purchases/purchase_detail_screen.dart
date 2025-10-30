@@ -100,6 +100,7 @@ class PurchaseDetailScreen extends StatelessWidget {
         children: [
           _row('Order ID', '#${p.id ?? '-'}'),
           _row('Date', p.date),
+          _row('Pickup', p.pickupDate),
           _row('Items', p.quantity.toString()),
           _row('Total paid', '${p.total.toStringAsFixed(2)} MXN'),
         ],
