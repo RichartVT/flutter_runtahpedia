@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/providers/shop_provider.dart';
 import 'package:flutter_application_1/widgets/app_bottom_nav.dart';
 import 'firebase_options.dart';
 import 'theme/app_theme.dart';
@@ -33,6 +34,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => NewsProvider()),
+        ChangeNotifierProvider(create: (_) => ShopProvider()),
       ],
       child: const RuntahPediaApp(),
     ),

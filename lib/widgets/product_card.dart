@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 
@@ -13,6 +15,14 @@ class ProductCard extends StatelessWidget {
     this.onAdd,
   });
 
+  ImageProvider _getImageProvider(String path) {
+    if (path.startsWith('/')) {
+      return FileImage(File(path));
+    } else {
+      return AssetImage(path);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -26,7 +36,10 @@ class ProductCard extends StatelessWidget {
             // Imagen fija en ratio → no crece
             AspectRatio(
               aspectRatio: 16 / 11,
-              child: Image.asset(product.imageUrl, fit: BoxFit.cover),
+              child: Image(
+                image: _getImageProvider(product.imageUrl),
+                fit: BoxFit.cover,
+              ),
             ),
 
             // Todo el contenido debajo se adapta al alto restante

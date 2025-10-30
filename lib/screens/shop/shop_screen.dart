@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/providers/shop_provider.dart';
+import 'package:flutter_application_1/screens/shop/product_form_screen.dart';
 import 'package:provider/provider.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
@@ -26,9 +28,9 @@ class _ShopScreenState extends State<ShopScreen> {
     final name = user?.displayName ?? user?.email ?? 'User';
 
     final cart = context.watch<CartProvider>();
+    final shop = context.watch<ShopProvider>();
 
-    // 🔍 Filtrar productos por categoría y búsqueda
-    final filteredProducts = sampleProducts.where((p) {
+    final filteredProducts = shop.products.where((p) {
       final matchesCategory =
           selectedCategory == 'All' ||
           p.category.toLowerCase() == selectedCategory.toLowerCase();
@@ -119,21 +121,53 @@ class _ShopScreenState extends State<ShopScreen> {
                   ),
                   itemBuilder: (_, i) {
                     final p = filteredProducts[i];
-                    return ProductCard(
-                      product: p,
-                      onTap: () {
-                        Navigator.of(context).pushNamed(
-                          ProductDetailScreen.route,
-                          arguments: p, // <-- MUY IMPORTANTE
-                        );
-                      },
-                      onAdd: () => context.read<CartProvider>().add(p),
+                    return Dismissible(
+                      key: ValueKey(p.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (_) =>
+                          context.read<ShopProvider>().remove(p.id),
+                      child: ProductCard(
+                        product: p,
+                        onTap: () {
+                          Navigator.of(
+                            context,
+                          ).pushNamed(ProductDetailScreen.route, arguments: p);
+                        },
+                        onAdd: () => context.read<CartProvider>().add(p),
+                      ),
                     );
                   },
                 ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (_) => const ProductFormScreen(),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
     );
+  }
+
+  void _addDummyProduct() {
+    final newProduct = Product(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: 'New Product',
+      imageUrl: 'assets/images/products/carrots.jpg',
+      category: 'Vegetables',
+      price: 99.0,
+      description: 'This is a newly added product.',
+    );
+    context.read<ShopProvider>().add(newProduct);
   }
 
   Widget _promo() => ClipRRect(
