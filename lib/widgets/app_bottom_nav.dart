@@ -4,7 +4,6 @@ import 'package:flutter_application_1/screens/purchases/purchase_history_screen.
 import '../screens/news/news_screen.dart';
 import '../screens/shop/shop_screen.dart';
 import '../screens/account/account_screen.dart';
-import '../theme/app_theme.dart';
 
 class AppBottomNav extends StatefulWidget {
   final int initialIndex;

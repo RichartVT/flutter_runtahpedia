@@ -3,10 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/news_provider.dart';
-import '../../models/news.dart';
 import 'news_form_screen.dart';
-import '../news/news_detail_screen.dart';
-import 'package:intl/intl.dart';
 
 class ActivityScreen extends StatefulWidget {
   static const route = '/activity'; // ✅ agregado
