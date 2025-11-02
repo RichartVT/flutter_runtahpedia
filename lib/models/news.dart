@@ -17,7 +17,6 @@ class News {
     required this.date,
   });
 
-  /// ✅ Comparación por ID (necesario para que `isSaved` y `toggleSaved` funcionen correctamente)
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

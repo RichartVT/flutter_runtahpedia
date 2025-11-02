@@ -27,7 +27,7 @@ class NewsProvider extends ChangeNotifier {
   Future<void> addNews(News news) async {
     await NewsDatabase.instance.insertNews(news);
     _savedNews.add(news);
-    debugPrint('✅ Added news: ${news.title}');
+    // debugPrint('Noticia agregadad: ${news.title}');
     notifyListeners();
   }
 
