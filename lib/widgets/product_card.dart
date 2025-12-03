@@ -68,7 +68,7 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            '${product.unit}, ${product.price.toStringAsFixed(0)}RP',
+                            '${product.unit}, ${product.price.toStringAsFixed(0)}MXN',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
