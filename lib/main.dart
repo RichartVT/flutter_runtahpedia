@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/providers/shop_provider.dart';
 import 'package:flutter_application_1/widgets/app_bottom_nav.dart';
-import 'firebase_options.dart';
 import 'theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +26,10 @@ import 'models/product.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  final apps = Firebase.apps;
+  if (apps.isEmpty) {
+    await Firebase.initializeApp();
+  }
 
   runApp(
     MultiProvider(

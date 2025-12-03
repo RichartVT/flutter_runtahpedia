@@ -47,30 +47,31 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBLz8HJkfbLl_jv7Ayjz8S4z3IflSLLZIU',
-    appId: '1:678549860039:web:2146d2c243a42c82b318e2',
-    messagingSenderId: '678549860039',
-    projectId: 'runtahpedia-88ed0',
-    authDomain: 'runtahpedia-88ed0.firebaseapp.com',
-    storageBucket: 'runtahpedia-88ed0.firebasestorage.app',
-    measurementId: 'G-Y63JB2LYRS',
+    apiKey: 'AIzaSyBbJ-fwusWzZjIU2ZR9nay0TjS1Xn9UHt8',
+    appId: '1:1054199043550:web:db56aadd4deb68da3db94f',
+    messagingSenderId: '1054199043550',
+    projectId: 'runtahpedia2',
+    authDomain: 'runtahpedia2.firebaseapp.com',
+    storageBucket: 'runtahpedia2.firebasestorage.app',
+    measurementId: 'G-0WD8XKJPJ7',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBdreW7SXPPL3h4w6CnyhvRUq8Pnd3H3eI',
-    appId: '1:678549860039:ios:ad0ff4524ca75b50b318e2',
-    messagingSenderId: '678549860039',
-    projectId: 'runtahpedia-88ed0',
-    storageBucket: 'runtahpedia-88ed0.firebasestorage.app',
-    iosBundleId: 'com.example.flutterApplication1',
+    apiKey: 'AIzaSyBOoIEbApgyySDM3uZWZuOO-Pqib0CYJp8',
+    appId: '1:1054199043550:ios:fad1c1308fc5201e3db94f',
+    messagingSenderId: '1054199043550',
+    projectId: 'runtahpedia2',
+    storageBucket: 'runtahpedia2.firebasestorage.app',
+    iosBundleId: 'com.richart.runtahpedia',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBdreW7SXPPL3h4w6CnyhvRUq8Pnd3H3eI',
-    appId: '1:678549860039:ios:ad0ff4524ca75b50b318e2',
-    messagingSenderId: '678549860039',
-    projectId: 'runtahpedia-88ed0',
-    storageBucket: 'runtahpedia-88ed0.firebasestorage.app',
+    apiKey: 'AIzaSyBOoIEbApgyySDM3uZWZuOO-Pqib0CYJp8',
+    appId: '1:1054199043550:ios:02fbe215bc87c9ee3db94f',
+    messagingSenderId: '1054199043550',
+    projectId: 'runtahpedia2',
+    storageBucket: 'runtahpedia2.firebasestorage.app',
     iosBundleId: 'com.example.flutterApplication1',
   );
+
 }
